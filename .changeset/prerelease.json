@@ -5,5 +5,7 @@
     "@prompteng/core": "0.0.1",
     "@prompteng/vscode-extension": "0.0.1"
   },
-  "changesets": []
+  "changesets": [
+    "angry-cars-live"
+  ]
 }
