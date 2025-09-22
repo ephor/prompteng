@@ -1,0 +1,28 @@
+template: "content-brief"
+description: "Content brief with assign/capture and case/when"
+
+providers:
+  - name: "mock"
+    model: "mock-1"
+
+test_cases:
+  - name: "Beginner with channels and terms"
+    variables:
+      project: "GreenLaunch"
+      audienceLevel: "beginner"
+      channels: ["blog", "newsletter", "linkedin"]
+      primaryTerms: ["sustainability", "eco-friendly", "renewable"]
+    assertions:
+      - contains: "GreenLaunch"
+      - contains: "beginner"
+      - contains: "sustainability"
+
+  - name: "Advanced, no channels, single term"
+    variables:
+      project: "DeepOptics"
+      audienceLevel: "advanced"
+      primaryTerms: ["wavefront"]
+    assertions:
+      - contains: "DeepOptics"
+      - contains: "advanced"
+      - contains: "wavefront"

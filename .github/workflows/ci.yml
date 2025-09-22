@@ -1,0 +1,108 @@
+name: CI & Release
+
+on:
+  push:
+    branches:
+      - main
+      - 'release/**'
+      - 'feat/**'
+      - 'fix/**'
+
+jobs:
+  commitlint:
+    if: github.event_name == 'pull_request'
+    name: Commitlint (Conventional Commits)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v6
+        with:
+          configFile: commitlint.config.cjs
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      upgraded: ${{ steps.release.outputs.upgraded }}
+      upgraded-packages: ${{ steps.release.outputs.upgraded-packages }}
+      git-head-ref: ${{ steps.set-git-head-ref.outputs.git-head-ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm -w build
+      - name: Test
+        run: pnpm -w test -- --run
+      - name: Release
+        id: release
+        uses: edenlabllc/changesets-action@v1
+        with:
+          mode: ${{ startsWith(github.ref_name, 'release/') && 'stable' || 'snapshot' }}
+          snapshot-tag: ${{ github.ref_name == 'main' && 'develop' || '' }}
+          commit: ${{ github.ref_name == 'main' || startsWith(github.ref_name, 'release/') }}
+          release-codenames: |
+            adjectives
+            starWars
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set git HEAD ref
+        id: set-git-head-ref
+        run: echo "git-head-ref=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+  publish:
+    name: Publish to NPM
+    needs: build
+    if: needs.build.outputs.upgraded == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ fromJSON(needs.build.outputs.upgraded-packages) }}
+    steps:
+      - name: Checkout code at new version commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build.outputs.git-head-ref }}
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+          cache: 'pnpm'
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm -w build
+      - name: Get NPM Tag
+        id: get_tag
+        run: |
+          if [[ "${{ github.ref_name }}" == release* ]]; then
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "tag=next" >> $GITHUB_OUTPUT
+          fi
+      - name: Publish ${{ matrix.package.name }} to NPM
+        if: steps.get_tag.outputs.tag != ''
+        run: pnpm --filter ${{ matrix.package.name }} publish --no-git-checks --tag ${{ steps.get_tag.outputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

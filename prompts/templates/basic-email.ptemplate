@@ -1,0 +1,19 @@
+---
+name: "basic-email"
+description: "Generate a short welcome email"
+variables:
+  - name: recipientName
+    type: string
+    required: true
+  - name: productName
+    type: string
+    required: true
+---
+{% section 'system' %}
+You are a helpful assistant writing concise, friendly emails.
+{% endsection %}
+
+{% section 'prompt' %}
+Write a short welcome email for {{ recipientName }} introducing {{ productName }}.
+Keep it positive and end with a friendly call-to-action.
+{% endsection %}

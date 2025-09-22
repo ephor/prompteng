@@ -1,0 +1,19 @@
+---
+name: "user-onboarding"
+description: "Generate personalized onboarding message"
+author: "team@company.com"
+version: "1.0.0"
+tags: ["onboarding", "user", "email"]
+variables:
+  - name: "userName"
+    type: "string"
+    required: true
+    description: "User's first name"
+  - name: "plan"
+    type: "string"
+    required: true
+---
+{# Onboarding email template #}
+Hello {{userName}}!
+
+Welcome to our platform. You're on the {{plan}} plan.

@@ -1,0 +1,127 @@
+{
+  "scopeName": "source.ptemplate",
+  "patterns": [
+    { "include": "#frontmatter" },
+    { "include": "#comments" },
+    { "include": "#commentBlock" },
+    { "include": "#sectionBlock" },
+    { "include": "#tags" },
+    { "include": "#variables" }
+  ],
+  "repository": {
+    "frontmatter": {
+      "name": "meta.embedded.block.yaml",
+      "begin": "^---",
+      "end": "^---",
+      "patterns": [{
+        "include": "source.yaml"
+      }]
+    },
+    "commentBlock": {
+      "name": "comment.block.liquid",
+      "begin": "\\{%\\s*comment\\s*%\\}",
+      "end": "\\{%\\s*endcomment\\s*%\\}",
+      "beginCaptures": { "0": { "name": "punctuation.definition.comment.begin.prompteng" } },
+      "endCaptures": { "0": { "name": "punctuation.definition.comment.end.prompteng" } },
+      "patterns": [ { "match": ".+", "name": "comment.block.content.prompteng" } ]
+    },
+    "sectionBlock": {
+      "name": "meta.section.block.prompteng",
+      "begin": "\\{%-?\\s*section\\b",
+      "end": "\\{%-?\\s*endsection\\s*-?%\\}",
+      "beginCaptures": { "0": { "name": "entity.name.section.begin.prompteng" } },
+      "endCaptures": { "0": { "name": "entity.name.section.end.prompteng" } },
+      "patterns": [
+        { "include": "#variables" },
+        { "include": "#tags" },
+        { "match": ".+", "name": "text.section.content.prompteng" }
+      ]
+    },
+    "comments": {
+      "name": "comment.block.prompteng",
+      "begin": "{#",
+      "end": "#}",
+      "captures": {
+        "0": {
+          "name": "punctuation.definition.comment.prompteng"
+        }
+      }
+    },
+    "variables": {
+      "name": "meta.interpolation.prompteng",
+      "begin": "\\{\\{-?",
+      "end": "-?\\}\\}",
+      "beginCaptures": {
+        "0": { "name": "punctuation.section.embedded.begin.prompteng" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.section.embedded.end.prompteng" }
+      },
+      "patterns": [
+        {
+          "match": "\\|\\s*([a-zA-Z_][\\w]*)",
+          "captures": { "1": { "name": "support.function.filter.prompteng" } }
+        },
+        {
+          "match": "([a-zA-Z_][\\w]*)(?:\\.[a-zA-Z_][\\w]*)*",
+          "name": "variable.other.object.prompteng"
+        },
+        { "match": "-?0x[0-9a-fA-F]+|\\d+", "name": "constant.numeric.prompteng" },
+        { "match": "\\b(true|false|null)\\b", "name": "constant.language.prompteng" },
+        { "match": "[|:,]", "name": "punctuation.separator.prompteng" },
+        {
+          "name": "string.quoted.double.prompteng",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.prompteng" }]
+        },
+        {
+          "name": "string.quoted.single.prompteng",
+          "begin": "'",
+          "end": "'",
+          "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.prompteng" }]
+        }
+      ]
+    },
+    "tags": {
+      "name": "meta.tag.block.prompteng",
+      "begin": "\\{%-?",
+      "end": "-?%\\}",
+      "beginCaptures": {
+        "0": { "name": "punctuation.section.tag.begin.prompteng" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.section.tag.end.prompteng" }
+      },
+      "patterns": [
+        {
+          "match": "\\G\\s*(upper|must_include_each|section|endsection)\\b",
+          "captures": { "1": { "name": "support.function.tag.custom.prompteng" } }
+        },
+        {
+          "match": "\\G\\s*([a-zA-Z_][\\w]*)",
+          "captures": { "1": { "name": "keyword.control.tag.prompteng" } }
+        },
+        {
+          "match": "([a-zA-Z_][\\w]*)(?:\\.[a-zA-Z_][\\w]*)*",
+          "name": "variable.other.object.prompteng"
+        },
+        { "match": "-?0x[0-9a-fA-F]+|\\d+", "name": "constant.numeric.prompteng" },
+        { "match": "\\b(true|false|null)\\b", "name": "constant.language.prompteng" },
+        { "match": "[|:,]", "name": "punctuation.separator.prompteng" },
+        {
+          "name": "string.quoted.double.prompteng",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.prompteng" }]
+        },
+        {
+          "name": "string.quoted.single.prompteng",
+          "begin": "'",
+          "end": "'",
+          "patterns": [{ "match": "\\\\.", "name": "constant.character.escape.prompteng" }]
+        }
+      ]
+    }
+  }
+}

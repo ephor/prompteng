@@ -1,0 +1,15 @@
+template: "creative-tagline"
+description: "Taglines basic checks"
+
+providers:
+  - name: "mock"
+    model: "mock-1"
+
+test_cases:
+  - name: "Energetic brand"
+    variables:
+      brandName: "Pulse"
+      adjectives: ["bold", "modern"]
+    assertions:
+      - contains: "Pulse"
+      - contains: "bold"

@@ -1,0 +1,142 @@
+{
+  "name": "prompteng-vscode",
+  "displayName": "PromptEng",
+  "description": "Professional prompt engineering tools",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "ptemplate",
+        "aliases": [
+          "Prompt Template",
+          "ptemplate"
+        ],
+        "extensions": [
+          ".ptemplate"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "ptest",
+        "aliases": [
+          "Prompt Test",
+          "ptest"
+        ],
+        "extensions": [
+          ".ptest"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "ptemplate",
+        "scopeName": "source.ptemplate",
+        "path": "./syntaxes/ptemplate.tmGrammar.json"
+      },
+      {
+        "language": "ptest",
+        "scopeName": "source.ptest",
+        "path": "./syntaxes/ptest.tmGrammar.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "prompteng.runPrompt",
+        "title": "PromptEng: Run Prompt",
+        "icon": "$(play)"
+      },
+      {
+        "command": "prompteng.runTests",
+        "title": "PromptEng: Run Tests",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "prompteng.generateTypes",
+        "title": "PromptEng: Generate TypeScript Types"
+      }
+    ],
+    "configuration": {
+      "title": "PromptEng",
+      "properties": {
+        "prompteng.providers.openai.apiKey": {
+          "type": "string",
+          "description": "OpenAI API Key"
+        },
+        "prompteng.defaultProvider": {
+          "type": "string",
+          "default": "openai",
+          "enum": [
+            "openai"
+          ]
+        }
+      }
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "prompteng.templates",
+          "name": "Prompt Templates",
+          "icon": "$(file-text)",
+          "contextualTitle": "PromptEng Templates"
+        },
+        {
+          "id": "prompteng.tests",
+          "name": "Prompt Tests",
+          "icon": "$(beaker)",
+          "contextualTitle": "PromptEng Tests"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "prompteng.runPrompt",
+          "when": "view == prompteng.templates",
+          "group": "navigation@1"
+        },
+        {
+          "command": "prompteng.runTests",
+          "when": "view == prompteng.tests",
+          "group": "navigation@1"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "prompteng.runPrompt",
+          "when": "view == prompteng.templates && viewItem == template",
+          "group": "inline@1"
+        },
+        {
+          "command": "prompteng.runTests",
+          "when": "view == prompteng.tests && viewItem == test",
+          "group": "inline@1"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsc -p ."
+  },
+  "dependencies": {
+    "@prompteng/core": "workspace:*",
+    "js-yaml": "^4.1.0",
+    "openai": "^5.22.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.7",
+    "@types/node": "^20.12.12",
+    "@types/vscode": "^1.104.0",
+    "@vscode/test-electron": "^2.3.9",
+    "typescript": "^5.9.2"
+  }
+}

@@ -1,0 +1,15 @@
+template: "faq-answer"
+description: "FAQ answer basics"
+
+providers:
+  - name: "mock"
+    model: "mock-1"
+
+test_cases:
+  - name: "Password reset"
+    variables:
+      question: "How do I reset my password?"
+      knowledgeBaseTopic: "Account Management"
+    assertions:
+      - contains: "password"
+      - contains: "Account Management"

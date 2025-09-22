@@ -1,0 +1,18 @@
+template: "personalized-reply"
+description: "Personalized reply with assign/capture and case/when"
+
+providers:
+  - name: "mock"
+    model: "mock-1"
+
+test_cases:
+  - name: "Pro tone professional with topics"
+    variables:
+      userName: "Mia"
+      userTier: "pro"
+      tone: "professional"
+      topics: ["billing", "invoices"]
+    assertions:
+      - contains: "pro"
+      - contains: "billing"
+      - not_contains: "unsubscribe"

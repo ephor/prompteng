@@ -1,0 +1,48 @@
+{
+  "name": "@prompteng/core",
+  "version": "0.0.1",
+  "description": "Core package for PromptEng toolkit",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "license": "Apache-2.0",
+  "author": "PromptEng Team <team@prompteng.dev>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ephor/prompteng.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ephor/prompteng/issues"
+  },
+  "homepage": "https://github.com/ephor/prompteng#readme",
+  "keywords": [
+    "prompt",
+    "templating",
+    "liquid",
+    "llm",
+    "vitest"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "liquidjs": "^10.21.1",
+    "openai": "^5.22.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.7",
+    "vitest": "^3.2.4"
+  },
+  "config": {}
+}

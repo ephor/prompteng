@@ -1,0 +1,20 @@
+template: "code-refactor"
+description: "Refactor suggestions"
+
+providers:
+  - name: "mock"
+    model: "mock-1"
+
+test_cases:
+  - name: "JS to TS goals"
+    variables:
+      language: "TypeScript"
+      goals: ["remove any", "improve types"]
+      codeSnippet: |
+        function add(a, b) {
+          return a + b
+        }
+    assertions:
+      - contains: "TypeScript"
+      - contains: "improve types"
+      - not_contains: "eval("

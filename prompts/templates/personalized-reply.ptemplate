@@ -1,0 +1,54 @@
+---
+name: "personalized-reply"
+description: "Generate a reply tuned by user tier and tone, demonstrating assign/capture and case/when"
+variables:
+  - name: userName
+    type: string
+    required: true
+  - name: userTier
+    type: string
+    required: true
+  - name: tone
+    type: string
+    required: false
+  - name: topics
+    type: array
+    required: false
+---
+{%- assign baseTone = tone | default: 'friendly' -%}
+
+{%- capture style -%}
+{%- case baseTone -%}
+  {%- when 'friendly' -%}Warm, encouraging, concise.
+  {%- when 'professional' -%}Clear, precise, respectful.
+  {%- when 'playful' -%}Light, upbeat, and playful.
+  {%- else -%}Neutral and concise.
+{%- endcase -%}
+{%- endcapture -%}
+
+{%- capture planNote -%}
+{%- case userTier -%}
+  {%- when 'free' -%}Note: highlight core value and suggest trying Pro features.
+  {%- when 'pro' -%}Note: mention advanced features and best practices.
+  {%- when 'enterprise' -%}Note: emphasize reliability, scale, and support SLAs.
+  {%- else -%}Note: keep advice general and helpful.
+{%- endcase -%}
+{%- endcapture -%}
+
+{%- capture topicsSummary -%}
+{{ topics | default: [] | uniq | join: ', ' }}
+{%- endcapture -%}
+
+{% section 'system' %}
+You are a helpful assistant.
+Style: {{ style | strip }}
+{% endsection %}
+
+{% section 'prompt' %}
+Reply to {{ userName }}.
+Plan: {{ userTier }}.
+Topics: {{ topicsSummary | strip | default: 'N/A' }}.
+{{ planNote | strip }}
+
+Provide a concise, actionable response.
+{% endsection %}

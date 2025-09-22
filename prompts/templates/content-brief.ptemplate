@@ -1,0 +1,51 @@
+---
+name: "content-brief"
+description: "Create a content brief based on audience level and channels; demonstrates assign/capture + case/when"
+variables:
+  - name: project
+    type: string
+    required: true
+  - name: audienceLevel
+    type: string
+    required: true
+  - name: channels
+    type: array
+    required: false
+  - name: primaryTerms
+    type: array
+    required: false
+---
+{%- assign level = audienceLevel | lower -%}
+
+{%- capture voice -%}
+{%- case level -%}
+  {%- when 'beginner' -%}Simple, approachable, and explanatory.
+  {%- when 'intermediate' -%}Balanced detail with practical examples.
+  {%- when 'advanced' -%}Technical depth with precise terminology.
+  {%- else -%}Neutral and general-purpose.
+{%- endcase -%}
+{%- endcapture -%}
+
+{%- capture channelsLine -%}
+{{ channels | default: [] | uniq | join: ', ' }}
+{%- endcapture -%}
+
+{% section 'system' %}
+You are a content strategist.
+Target voice: {{ voice | strip }}
+{% endsection %}
+
+{% section 'prompt' %}
+Create a content brief for the project: {{ project }}.
+Audience level: {{ audienceLevel }}.
+Distribution channels: {{ channelsLine | strip | default: 'N/A' }}.
+
+Outline:
+- Goals (3-5 bullets)
+- Audience insights (2-3 bullets)
+- Key terms and phrases
+- Proposed structure (H2/H3 headings)
+- Examples and references
+
+{% must_include_each primaryTerms %}
+{% endsection %}

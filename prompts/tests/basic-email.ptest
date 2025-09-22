@@ -1,0 +1,16 @@
+template: "basic-email"
+description: "Simple email test"
+
+providers:
+  - name: "mock"
+    model: "mock-1"
+
+test_cases:
+  - name: "Welcome Ada"
+    variables:
+      recipientName: "Ada"
+      productName: "Acme"
+    assertions:
+      - contains: "Ada"
+      - contains: "Acme"
+      - not_contains: "unsubscribe"

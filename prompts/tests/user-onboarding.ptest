@@ -1,0 +1,15 @@
+template: "user-onboarding"
+description: "Test onboarding template variations"
+
+providers:
+  - name: "mock"
+    model: "mock-1"
+
+test_cases:
+  - name: "Free plan user"
+    variables:
+      userName: "John"
+      plan: "free"
+    assertions:
+      - contains: "free plan"
+      - not_contains: "Pro user"

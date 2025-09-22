@@ -1,0 +1,6 @@
+{
+  "scopeName": "source.ptest",
+  "patterns": [
+    { "include": "source.yaml" }
+  ]
+}

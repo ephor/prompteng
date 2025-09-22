@@ -1,0 +1,16 @@
+---
+name: "creative-tagline"
+description: "Generate 5 short brand taglines"
+variables:
+  - name: brandName
+    type: string
+    required: true
+  - name: adjectives
+    type: array
+    required: false
+---
+{% section 'prompt' %}
+Generate 5 short, punchy taglines for the brand {{ brandName }}.
+Incorporate the feel of: {{ adjectives | default: [] | join: ', ' }}.
+Number them 1 to 5.
+{% endsection %}

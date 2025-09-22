@@ -1,0 +1,27 @@
+---
+name: "code-refactor"
+description: "Suggest refactors for a snippet"
+variables:
+  - name: language
+    type: string
+    required: true
+  - name: goals
+    type: array
+    required: false
+  - name: codeSnippet
+    type: string
+    required: true
+---
+{% section 'system' %}
+You are a senior {{ language }} engineer. Provide actionable, minimal changes.
+{% endsection %}
+
+{% section 'prompt' %}
+Given this {{ language }} code snippet, suggest refactors.
+Goals: {{ goals | default: [] | uniq | join: ', ' }}
+
+```
+{{ codeSnippet }}
+```
+Provide rationale and a short patch-style outline.
+{% endsection %}

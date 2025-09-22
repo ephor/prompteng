@@ -1,0 +1,16 @@
+---
+name: "faq-answer"
+description: "Answer a user question with a concise FAQ-style response"
+variables:
+  - name: question
+    type: string
+    required: true
+  - name: knowledgeBaseTopic
+    type: string
+    required: false
+---
+{% section 'prompt' %}
+Answer the following question in 3-5 sentences.
+If relevant, reference {{ knowledgeBaseTopic | default: 'the product documentation' }}.
+Question: {{ question }}
+{% endsection %}
