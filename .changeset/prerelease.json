@@ -6,6 +6,7 @@
     "@prompteng/vscode-extension": "0.0.1"
   },
   "changesets": [
-    "angry-cars-live"
+    "angry-cars-live",
+    "forty-chairs-nail"
   ]
 }
