@@ -3,6 +3,13 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 import { PromptTemplate, ValidationResult } from './types';
 import { TemplateParser } from './parser';
+import {
+  renderCommon,
+  renderWithMetaCommon,
+  renderMultiCommon,
+  validateVariablesCommon,
+  generateTypeDefinitionsCommon,
+} from './engine-helpers';
 
 export interface EngineOptions {
   // Options for future enhancements
@@ -83,13 +90,7 @@ export class PromptEngine {
    * - {@link PromptEngine.renderMulti} — returns a section map and falls back to `{ prompt: text }` when no sections present.
    */
   async render(templateName: string, variables: Record<string, any>): Promise<string> {
-    const template = this.templates.get(templateName);
-    if (!template) {
-      throw new Error(`Template '${templateName}' not found.`);
-    }
-
-    this.validateVariables(templateName, variables);
-    return this.parser.render(template.content, variables);
+    return renderCommon(this.parser, this.templates, templateName, variables);
   }
 
   /**
@@ -103,15 +104,7 @@ export class PromptEngine {
    * Use this when you need access to sections and/or constraints in addition to the combined text.
    */
   async renderWithMeta(templateName: string, variables: Record<string, any>): Promise<{ text: string; sections: Record<string, string>; constraints: any[] }> {
-    const template = this.templates.get(templateName);
-    if (!template) {
-      throw new Error(`Template '${templateName}' not found.`);
-    }
-    this.validateVariables(templateName, variables);
-    const { text, meta } = await this.parser.renderWithMeta(template.content, variables);
-    const sections = (meta && meta.sections) || {};
-    const constraints = (meta && meta.constraints) || [];
-    return { text, sections, constraints };
+    return renderWithMetaCommon(this.parser, this.templates, templateName, variables);
   }
 
   /**
@@ -122,28 +115,11 @@ export class PromptEngine {
    * does not need constraints.
    */
   async renderMulti(templateName: string, variables: Record<string, any>): Promise<Record<string, string>> {
-    const { text, sections } = await this.renderWithMeta(templateName, variables);
-    if (!sections || Object.keys(sections).length === 0) {
-      // fallback: treat whole output as a single 'prompt' section
-      return { prompt: text };
-    }
-    return sections;
+    return renderMultiCommon(this.parser, this.templates, templateName, variables);
   }
 
   validateVariables(templateName: string, variables: Record<string, any>): ValidationResult {
-    const template = this.templates.get(templateName);
-    if (!template) {
-      throw new Error(`Template '${templateName}' not found.`);
-    }
-
-    const errors: string[] = [];
-    for (const varDef of template.variables) {
-      if (varDef.required && !(varDef.name in variables)) {
-        errors.push(`Missing required variable: '${varDef.name}'`);
-      }
-    }
-
-    return { valid: errors.length === 0, errors };
+    return validateVariablesCommon(this.templates, templateName, variables);
   }
 
   getTemplate(templateName: string): PromptTemplate | undefined {
@@ -155,42 +131,6 @@ export class PromptEngine {
   }
   
   generateTypeDefinitions(): string {
-    const interfaces: string[] = [];
-
-    for (const [name, template] of this.templates) {
-      const interfaceName = this.toPascalCase(name) + 'Variables';
-      const properties: string[] = [];
-
-      for (const varDef of template.variables) {
-        const tsType = this.mapToTsType(varDef.type);
-        const optional = varDef.required ? '' : '?';
-        const comment = varDef.description ? ` // ${varDef.description}` : '';
-        properties.push(`    ${varDef.name}${optional}: ${tsType};${comment}`);
-      }
-
-      if (properties.length > 0) {
-        interfaces.push(`export interface ${interfaceName} {\n${properties.join('\n')}\n}`);
-      }
-    }
-
-    return interfaces.join('\n\n');
-  }
-
-  private toPascalCase(str: string): string {
-    return str
-      .split(/[-_\s]+/)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join('');
-  }
-
-  private mapToTsType(type: string): string {
-    switch (type) {
-      case 'string': return 'string';
-      case 'number': return 'number';
-      case 'boolean': return 'boolean';
-      case 'array': return 'any[]';
-      case 'object': return 'Record<string, any>';
-      default: return 'any';
-    }
+    return generateTypeDefinitionsCommon(this.templates);
   }
 }

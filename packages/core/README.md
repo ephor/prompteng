@@ -18,6 +18,89 @@ pnpm add @prompteng/core
 
 Requires Node 18+.
 
+## Cloudflare Workers / Edge Runtimes
+
+Use the worker-friendly engine that reads `.ptemplate` files from Cloudflare Static Assets. The DX is the same as Node: you pass a directory path.
+
+### Minimal Wrangler setup
+
+Place your templates under `public/prompts/templates/` and configure assets in `wrangler.toml`:
+
+```toml
+# wrangler.toml
+name = "your-worker"
+main = "src/index.ts"
+compatibility_date = "2024-06-01"
+
+[assets]
+directory = "public"
+```
+
+Folder layout:
+
+```
+public/
+  prompts/
+    templates/
+      with-system.ptemplate
+      greet.ptemplate
+```
+
+### Hono + Cloudflare Workers (recommended integration pattern)
+
+```ts
+import { Hono } from 'hono';
+import { WorkerEngine, registerCloudflareAssets } from '@prompteng/core/worker';
+import { generateText } from 'ai';
+import { createOpenAI } from '@ai-sdk/openai';
+
+type Bindings = {
+  ASSETS: { fetch: (r: Request) => Promise<Response> };
+  OPENAI_API_KEY: string;
+};
+
+const app = new Hono<{ Bindings: Bindings }>();
+
+// Middleware: register assets/manifest and attach engine to context
+app.use('*', async (c, next) => {
+  registerCloudflareAssets(c.env.ASSETS, (globalThis as any).__STATIC_CONTENT_MANIFEST);
+  const engine = new WorkerEngine('/prompts/templates');
+  c.set('prompteng', engine);
+  await next();
+});
+
+// Example endpoint: render sections and call AI SDK
+app.get('/some-endpoint', async (c) => {
+  const engine = c.get('prompteng') as WorkerEngine;
+  const sections = await engine.renderMulti('with-system', { name: 'Bob' });
+
+  const openai = createOpenAI({ apiKey: c.env.OPENAI_API_KEY });
+  const { text } = await generateText({
+    model: openai('gpt-4o-mini'),
+    system: sections.system,
+    prompt: sections.prompt,
+  });
+
+  return c.json({ res: text });
+});
+
+export default app;
+```
+
+Notes:
+- Templates are NOT public by default. They’re accessible to your Worker code via `env.ASSETS`. Don’t proxy user requests to `ASSETS.fetch` unless you intend to expose assets.
+- Optional: if you don’t use CF assets (tests, special runtimes), you can register a virtual FS:
+
+```ts
+import { WorkerEngine, registerVfs } from '@prompteng/core/worker';
+
+registerVfs({
+  '/prompts/templates/greet.ptemplate': `---\nname: greet\nvariables: []\n---\nHello!`
+});
+
+const engine = new WorkerEngine('/prompts/templates');
+```
+
 ## Templates (.ptemplate)
 
 Each template file uses YAML frontmatter for metadata and variables, followed by Liquid content. You can define multiple named outputs using the `section` block.
