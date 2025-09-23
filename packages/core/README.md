@@ -97,6 +97,16 @@ const out = await engine.renderMulti('email-welcome', { recipientName: 'Ada', pr
 // { system: string, prompt: string }
 ```
 
+### Which API to use
+
+- Use `engine.render(name, vars)` when your template does not define sections or you only need the combined text output.
+- Use `engine.renderWithMeta(name, vars)` when you need both the combined text and metadata:
+  - returns `{ text, sections, constraints }`
+  - `sections` is a map of named outputs captured via `{% section %}...{% endsection %}`
+  - `constraints` contains structured info for testing/validation
+- Use `engine.renderMulti(name, vars)` when your caller expects a map of sections and you don't need constraints:
+  - always returns a map and falls back to `{ prompt: text }` if no sections are present.
+
 ## Templating guide (self‑contained)
 
 PromptEng uses a Liquid-compatible syntax, but you don’t need the Liquid docs to get started. This guide summarizes what you’ll use 90% of the time when writing `.ptemplate` files.

@@ -1,95 +1,142 @@
-# PromptEng Monorepo
+# PromptEng
 
-Monorepo for PromptEng: core library, CLI, and VSCode extension.
+Type-safe prompt templating, testing, and tooling for LLM apps. This monorepo contains the Core engine, a CLI, and a VSCode extension.
 
-## Packages
+- **Core (`@prompteng/core`)** — LiquidJS-powered, safe prompt templates, multi-output sections, constraint tags, and first-class tests.
+- **CLI (`@prompteng/cli`)** — Init project structure, run prompt tests, generate TypeScript types.
+- **VSCode Extension** — Syntax highlighting and commands for templates/tests.
 
-- packages/core — Core rendering engine, providers, testing framework
-- packages/cli — Command-line interface for init/test/generate-types
-- packages/vscode-extension — VSCode extension: syntax highlighting and commands
+If you just want to use PromptEng in your app, start with the Core docs:
 
-## Quickstart
+- ➡️ [Detailed guide: packages/core/README.md](./packages/core/README.md)
 
-Prerequisites: pnpm >= 9, Node 18+
+## Quick start
 
-Install dependencies:
+### Use as a library (Core)
+
+Install:
 
 ```sh
-pnpm install
+npm i @prompteng/core
+# or
+pnpm add @prompteng/core
 ```
 
-### Core
+Minimal template (`prompts/templates/email-welcome.ptemplate`):
 
-Run tests (Vitest):
+```liquid
+---
+name: "email-welcome"
+description: "Welcome email generator"
+variables:
+  - name: recipientName
+    type: string
+    required: true
+  - name: productName
+    type: string
+    required: true
+---
+{% section 'system' %}
+You are a helpful assistant writing concise, friendly emails.
+{% endsection %}
+
+{% section 'prompt' %}
+Write a short welcome email for {{ recipientName }} to introduce {{ productName }}.
+{% endsection %}
+```
+
+Render it:
+
+```ts
+import { PromptEngine } from '@prompteng/core';
+
+const engine = new PromptEngine('prompts/templates');
+const { sections } = await engine.renderWithMeta('email-welcome', {
+  recipientName: 'Ada',
+  productName: 'Acme'
+});
+// sections.system, sections.prompt
+```
+
+Write a simple prompt test (`prompts/tests/email-welcome.ptest`):
+
+```yaml
+template: "email-welcome"
+description: "Welcome email basic test"
+providers:
+  - name: "mock"
+    model: "mock-1"
+
+test_cases:
+  - name: "Simple welcome"
+    variables:
+      recipientName: "Ada"
+      productName: "Acme"
+    assertions:
+      - contains: "Acme"
+      - not_contains: "unsubscribe"
+```
+
+Run tests (Vitest under the hood via our runner):
 
 ```sh
 pnpm -F @prompteng/core test
 ```
 
-Build:
+For more examples, custom tags/filters, and type generation, see the Core README:
+
+- 📘 [packages/core/README.md](./packages/core/README.md)
+
+## Examples
+
+- 📂 [prompts/](./prompts/) — example templates and tests you can run and modify.
+
+### Work in this monorepo
+
+Prerequisites: Node 18+, pnpm >= 9
+
+Install dependencies and build:
 
 ```sh
+pnpm install
 pnpm -F @prompteng/core build
 ```
 
-Generate types from templates:
+Packages:
 
-```ts
-import { PromptEngine } from '@prompteng/core';
-const engine = new PromptEngine('prompts/templates');
-const dts = engine.generateTypeDefinitions();
-```
+- `packages/core` — Core rendering engine, providers, testing framework
+- `packages/cli` — Command-line interface for init/test/generate-types
+- `packages/vscode-extension` — VSCode extension: syntax highlighting and commands
 
-### CLI
-
-Build:
+CLI examples (from repo):
 
 ```sh
+# Build CLI
 pnpm -F @prompteng/cli build
-```
 
-Initialize a project structure:
-
-```sh
+# Initialize a prompts workspace
 node packages/cli/lib/index.js init
-```
 
-Run prompt tests:
-
-```sh
-# Optional: set real provider key
+# Run prompt tests (optionally set a real provider key)
 export OPENAI_API_KEY=sk-...
-
 node packages/cli/lib/index.js test
-```
 
-Generate TypeScript types:
-
-```sh
+# Generate TypeScript types from templates
 node packages/cli/lib/index.js generate-types
 ```
 
-### VSCode Extension
-
-Build:
+VSCode Extension:
 
 ```sh
 pnpm -F prompteng-vscode build
 ```
 
-Launch VSCode with this workspace and press F5 to start the Extension Development Host. The extension provides:
+Launch VSCode and press F5 to start the Extension Development Host. The extension provides:
 
 - Prompt Template syntax highlighting (`.ptemplate`)
 - Prompt Test syntax highlighting (`.ptest`)
 - Explorer views: "Prompt Templates" and "Prompt Tests"
-- Commands:
-  - "PromptEng: Run Prompt"
-  - "PromptEng: Run Tests"
-  - "PromptEng: Generate TypeScript Types"
-
-To use OpenAI inside the extension, set:
-
-Settings → Extensions → PromptEng → Providers → OpenAI API Key
+- Commands: Run Prompt, Run Tests, Generate TypeScript Types
 
 ## Conventions
 
