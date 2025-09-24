@@ -1,6 +1,6 @@
 {
   "name": "@prompteng/core",
-  "version": "0.1.0-c74fdbc-develop",
+  "version": "0.1.0-3b13a64-develop",
   "description": "Core package for PromptEng toolkit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
