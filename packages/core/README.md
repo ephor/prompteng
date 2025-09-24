@@ -43,7 +43,7 @@ public/
   prompts/
     templates/
       with-system.ptemplate
-      greet.ptemplate
+      prompteng.manifest.json
 ```
 
 ### Hono + Cloudflare Workers (recommended integration pattern)
@@ -89,6 +89,7 @@ export default app;
 
 Notes:
 - Templates are NOT public by default. They’re accessible to your Worker code via `env.ASSETS`. Don’t proxy user requests to `ASSETS.fetch` unless you intend to expose assets.
+- If Wrangler doesn’t expose `__STATIC_CONTENT_MANIFEST` (local dev), create `prompteng.manifest.json` as shown above so the engine can enumerate your `.ptemplate` files.
 - Optional: if you don’t use CF assets (tests, special runtimes), you can register a virtual FS:
 
 ```ts
@@ -100,6 +101,13 @@ registerVfs({
 
 const engine = new WorkerEngine('/prompts/templates');
 ```
+
+If you prefer to access `__STATIC_CONTENT` directly (e.g., in production workers), use `registerStaticContent(env.__STATIC_CONTENT, __STATIC_CONTENT_MANIFEST)` instead of `registerCloudflareAssets`.
+
+### Local Hono (Node) example
+
+- `examples/hono-basic/` shows how to use `PromptEngine` in a standard Hono app running under Node.
+- `examples/worker-basic/` and `examples/worker-hono/` demonstrate Cloudflare Workers setups.
 
 ## Templates (.ptemplate)
 

@@ -14,6 +14,8 @@ export interface WorkerEngineOptions {
   assetsBinding?: { fetch: (req: Request) => Promise<Response> };
   // Manifest mapping asset paths -> hashes; can be a stringified JSON (CF default) or object
   manifest?: Record<string, string> | string;
+  // Cloudflare __STATIC_CONTENT (KV) binding for assets
+  staticContentKV?: { get: (key: string, type?: unknown) => Promise<string | ArrayBuffer | null> };
   // Optional in-memory virtual FS for advanced bundler setups or tests
   vfs?: Record<string, string>;
 }
@@ -61,20 +63,34 @@ export class WorkerEngine {
 
   private async ensureLoaded() {
     if (this.loaded) return;
-    // Strategy 1: Cloudflare Assets + manifest
-    const manifest = resolveManifest(this.options?.manifest);
-    if (manifest && this.options?.assetsBinding) {
-      await this.loadFromAssetsManifest(manifest, this.options.assetsBinding);
-      this.loaded = true;
-      return;
+    const g: any = globalThis as any;
+
+    // Strategy 1: Cloudflare Assets + manifest OR index fallback
+    const optAssets = this.options?.assetsBinding;
+    const optManifest = resolveManifest(this.options?.manifest);
+    const gAssets = (g.__PROMPTENG_ASSETS__ as WorkerEngineOptions['assetsBinding']) || undefined;
+    const gManifest = resolveManifest(g.__STATIC_CONTENT_MANIFEST);
+    const assets = optAssets || gAssets;
+    const manifest = optManifest || gManifest;
+    if (assets) {
+      if (manifest) {
+        await this.loadFromAssetsManifest(manifest, assets);
+        this.loaded = true;
+        return;
+      }
+      // try index files if manifest is not present
+      const loadedViaIndex = await this.tryLoadFromAssetsIndex(assets);
+      if (loadedViaIndex) {
+        this.loaded = true;
+        return;
+      }
     }
 
-    // Strategy 2: Global manifest + assets binding
-    const g: any = globalThis as any;
-    const gManifest = resolveManifest(g.__STATIC_CONTENT_MANIFEST);
-    const gAssets = g.__PROMPTENG_ASSETS__ as WorkerEngineOptions['assetsBinding'];
-    if (gManifest && gAssets) {
-      await this.loadFromAssetsManifest(gManifest, gAssets);
+    // Strategy 2: Cloudflare __STATIC_CONTENT (KV) + manifest via options or globals
+    const kvManifest = resolveManifest(this.options?.manifest) || resolveManifest((globalThis as any).__STATIC_CONTENT_MANIFEST);
+    const kv = this.options?.staticContentKV || (g.__STATIC_CONTENT as WorkerEngineOptions['staticContentKV']);
+    if (kvManifest && kv) {
+      await this.loadFromStaticKV(kvManifest, kv);
       this.loaded = true;
       return;
     }
@@ -130,6 +146,57 @@ export class WorkerEngine {
         this.templates.set(template.name, template);
       } catch (e: any) {
         console.warn(`[WorkerEngine] Skipping invalid template '${key}': ${e?.message || e}`);
+      }
+    }
+  }
+
+  private async tryLoadFromAssetsIndex(assets: { fetch: (req: Request) => Promise<Response> }): Promise<boolean> {
+    const base = this.baseDir.replace(/\/$/, '');
+    const candidates = [
+      `${base}/prompteng.manifest.json`, // preferred format { "files": ["a.ptemplate", ...] }
+    ];
+    for (const indexPath of candidates) {
+      try {
+        const url = new URL('http://local' + (indexPath.startsWith('/') ? '' : '/') + indexPath);
+        const res = await assets.fetch(new Request(url.toString()));
+        if (!res.ok) continue;
+        const text = await res.text();
+        const data = JSON.parse(text);
+        const files: string[] = Array.isArray(data) ? data : (Array.isArray(data.files) ? data.files : []);
+        if (!files.length) continue;
+        for (const rel of files) {
+          const assetPath = (this.baseDir.replace(/^\//, '') + '/' + rel).replace(/\\+/g, '/');
+          const fileUrl = new URL('http://local/' + assetPath);
+          const resp = await assets.fetch(new Request(fileUrl.toString()));
+          if (!resp.ok) { console.warn(`[WorkerEngine] Failed to fetch asset '${assetPath}': ${resp.status}`); continue; }
+          const fileContent = await resp.text();
+          try {
+            const t = this.parseTemplateFromString(fileContent);
+            this.templates.set(t.name, t);
+          } catch (e: any) {
+            console.warn(`[WorkerEngine] Skipping invalid template '${assetPath}': ${e?.message || e}`);
+          }
+        }
+        return this.templates.size > 0;
+      } catch {}
+    }
+    return false;
+  }
+
+  private async loadFromStaticKV(manifest: Record<string, string>, kv: { get: (key: string, type?: unknown) => Promise<string | ArrayBuffer | null> }) {
+    const keys = Object.keys(manifest);
+    const dirPrefix = this.baseDir.replace(/^\//, '');
+    const candidates = keys.filter(k => k.startsWith(dirPrefix) && k.endsWith('.ptemplate'));
+    for (const assetPath of candidates) {
+      const storedKey = manifest[assetPath];
+      if (!storedKey) continue;
+      try {
+        const text = await kv.get(storedKey, 'text' as any);
+        if (typeof text !== 'string') { console.warn(`[WorkerEngine] Asset not found in KV for '${assetPath}'`); continue; }
+        const t = this.parseTemplateFromString(text);
+        this.templates.set(t.name, t);
+      } catch (e: any) {
+        console.warn(`[WorkerEngine] Failed to read KV asset '${assetPath}': ${e?.message || e}`);
       }
     }
   }
