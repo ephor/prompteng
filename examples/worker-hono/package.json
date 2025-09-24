@@ -1,0 +1,19 @@
+{
+  "name": "@prompteng/example-worker-hono",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev"
+  },
+  "dependencies": {
+    "@prompteng/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "wrangler": "^4.39.0",
+    "hono": "^4.9.8",
+    "ai": "^5.0.51",
+    "@ai-sdk/openai": "^2.0.34",
+    "zod": "^4.1.11"
+  }
+}

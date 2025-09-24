@@ -1,0 +1,9 @@
+---
+name: with-system
+variables:
+  - name: name
+    type: string
+    required: false
+---
+{% section system %}You are a helpful assistant.{% endsection %}
+{% section prompt %}Hello {{ name | default: 'world' }}{% endsection %}
