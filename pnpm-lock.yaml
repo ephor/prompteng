@@ -35,10 +35,10 @@ importers:
     devDependencies:
       '@hono/node-server':
         specifier: ^1.19.4
-        version: 1.19.4(hono@4.9.8)
+        version: 1.19.4(hono@4.10.2)
       hono:
-        specifier: ^4.9.8
-        version: 4.9.8
+        specifier: ^4.10.2
+        version: 4.10.2
       tsx:
         specifier: ^4.19.2
         version: 4.20.5
@@ -72,8 +72,8 @@ importers:
         specifier: ^5.0.51
         version: 5.0.51(zod@4.1.11)
       hono:
-        specifier: ^4.9.8
-        version: 4.9.8
+        specifier: ^4.10.2
+        version: 4.10.2
       typescript:
         specifier: ^5.9.2
         version: 5.9.2
@@ -1603,8 +1603,8 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
-  hono@4.9.8:
-    resolution: {integrity: sha512-JW8Bb4RFWD9iOKxg5PbUarBYGM99IcxFl2FPBo2gSJO11jjUDqlP1Bmfyqt8Z/dGhIQ63PMA9LdcLefXyIasyg==}
+  hono@4.10.2:
+    resolution: {integrity: sha512-p6fyzl+mQo6uhESLxbF5WlBOAJMDh36PljwlKtP5V1v09NxlqGru3ShK+4wKhSuhuYf8qxMmrivHOa/M7q0sMg==}
     engines: {node: '>=16.9.0'}
 
   hosted-git-info@2.8.9:
@@ -3254,9 +3254,9 @@ snapshots:
   '@esbuild/win32-x64@0.25.4':
     optional: true
 
-  '@hono/node-server@1.19.4(hono@4.9.8)':
+  '@hono/node-server@1.19.4(hono@4.10.2)':
     dependencies:
-      hono: 4.9.8
+      hono: 4.10.2
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
@@ -4225,7 +4225,7 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  hono@4.9.8: {}
+  hono@4.10.2: {}
 
   hosted-git-info@2.8.9: {}
 
