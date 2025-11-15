@@ -129,7 +129,7 @@
   },
   "dependencies": {
     "@prompteng/core": "workspace:*",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "openai": "^5.22.0"
   },
   "devDependencies": {

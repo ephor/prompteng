@@ -46,7 +46,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "liquidjs": "^10.21.1",
     "openai": "^5.22.0"
   },
