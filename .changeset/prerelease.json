@@ -1,13 +1,12 @@
 {
-  "mode": "snapshot",
+  "mode": "stable",
   "initialVersions": {
-    "@prompteng/cli": "0.0.1",
-    "@prompteng/core": "0.0.1",
-    "@prompteng/vscode-extension": "0.0.1"
+    "@prompteng/example-hono-basic": null,
+    "@prompteng/example-worker-basic": null,
+    "@prompteng/example-worker-hono": null,
+    "@prompteng/cli": "0.0.2",
+    "@prompteng/core": "0.1.0",
+    "prompteng-vscode": "0.0.2"
   },
-  "changesets": [
-    "angry-cars-live",
-    "forty-chairs-nail",
-    "strange-spiders-rhyme"
-  ]
+  "changesets": []
 }

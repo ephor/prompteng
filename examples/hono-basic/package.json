@@ -13,5 +13,6 @@
     "@hono/node-server": "^1.19.4",
     "tsx": "^4.19.2",
     "typescript": "^5.9.2"
-  }
+  },
+  "version": null
 }

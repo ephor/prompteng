@@ -1,6 +1,6 @@
 {
   "name": "@prompteng/cli",
-  "version": "0.0.2-2c24088-develop",
+  "version": "0.0.2",
   "description": "CLI for PromptEng toolkit",
   "main": "dist/index.js",
   "bin": {
